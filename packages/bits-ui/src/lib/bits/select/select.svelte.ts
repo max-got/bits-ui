@@ -87,6 +87,11 @@ class SelectBaseRootState {
 	isCombobox = $state(false);
 	bitsAttrs: SelectBitsAttrs;
 	triggerPointerDownPos = $state.raw<{ x: number; y: number } | null>({ x: 0, y: 0 });
+	hasBeenOpened = $state(false);
+	hasInteracted = $state(false);
+	hasValue = $state(false);
+	isInvalid = $derived.by(() => this.required.current && !this.hasValue);
+	isUserInvalid = $derived.by(() => this.hasInteracted && this.isInvalid);
 
 	constructor(props: SelectBaseRootStateProps) {
 		this.disabled = props.disabled;
@@ -106,6 +111,17 @@ class SelectBaseRootState {
 				this.setHighlightedNode(null);
 			}
 		});
+
+		watch(
+			() => this.open.current,
+			(isOpen) => {
+				if (isOpen) {
+					this.hasBeenOpened = true;
+				} else if (this.hasBeenOpened) {
+					this.hasInteracted = true;
+				}
+			}
+		);
 	}
 
 	setHighlightedNode(node: HTMLElement | null) {
@@ -723,6 +739,8 @@ class SelectTriggerState {
 				"data-state": getDataOpenClosed(this.root.open.current),
 				"data-disabled": getDataDisabled(this.root.disabled.current),
 				"data-placeholder": this.root.hasValue ? undefined : "",
+				"data-invalid": this.root.isInvalid ? "" : undefined,
+				"data-user-invalid": this.root.isUserInvalid ? "" : undefined,
 				[this.root.bitsAttrs.trigger]: "",
 				onpointerdown: this.onpointerdown,
 				onkeydown: this.onkeydown,

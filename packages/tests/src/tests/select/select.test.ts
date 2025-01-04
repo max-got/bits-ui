@@ -530,6 +530,32 @@ describe("select - single", () => {
 		const [item0v3] = getItems(getByTestId);
 		expectSelected(item0v3!);
 	});
+
+	it("should apply data-invalid when required and no value is selected", async () => {
+		const { trigger } = setupSingle({ required: true });
+		expect(trigger).toHaveAttribute("data-invalid");
+	});
+
+	it("should not apply data-invalid when required and a value is selected", async () => {
+		const { trigger } = setupSingle({ required: true, value: "1" });
+		expect(trigger).not.toHaveAttribute("data-invalid");
+	});
+
+	it("should apply data-user-invalid after user interaction when required and no value is selected", async () => {
+		const { trigger, user } = setupSingle({ required: true });
+		expect(trigger).not.toHaveAttribute("data-user-invalid");
+		await user.click(trigger);
+		await user.keyboard(kbd.ESCAPE);
+		expect(trigger).toHaveAttribute("data-user-invalid");
+	});
+
+	it("should not apply data-user-invalid when required and a value is selected after interaction", async () => {
+		const { trigger, user } = setupSingle({ required: true });
+		await user.click(trigger);
+		await user.keyboard(kbd.ARROW_DOWN);
+		await user.keyboard(kbd.ENTER);
+		expect(trigger).not.toHaveAttribute("data-user-invalid");
+	});
 });
 
 ////////////////////////////////////
@@ -820,6 +846,32 @@ describe("select - multiple", () => {
 
 		await user.click(submit);
 		expect(submittedValues).toHaveLength(0);
+	});
+
+	it("should apply data-invalid when required and no values are selected", async () => {
+		const { trigger } = setupMultiple({ required: true });
+		expect(trigger).toHaveAttribute("data-invalid");
+	});
+
+	it("should not apply data-invalid when required and values are selected", async () => {
+		const { trigger } = setupMultiple({ required: true, value: ["1"] });
+		expect(trigger).not.toHaveAttribute("data-invalid");
+	});
+
+	it("should apply data-user-invalid after user interaction when required and no values are selected", async () => {
+		const { trigger, user } = setupMultiple({ required: true });
+		expect(trigger).not.toHaveAttribute("data-user-invalid");
+		await user.click(trigger);
+		await user.keyboard(kbd.ESCAPE);
+		expect(trigger).toHaveAttribute("data-user-invalid");
+	});
+
+	it("should not apply data-user-invalid when required and values are selected after interaction", async () => {
+		const { trigger, user } = setupMultiple({ required: true });
+		await user.click(trigger);
+		await user.keyboard(kbd.ARROW_DOWN);
+		await user.keyboard(kbd.ENTER);
+		expect(trigger).not.toHaveAttribute("data-user-invalid");
 	});
 });
 
